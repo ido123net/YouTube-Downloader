@@ -2,17 +2,15 @@ from __future__ import annotations
 
 import argparse
 import logging
-import os
 
-from moviepy.editor import VideoFileClip
-from pytube import YouTube
+from .convert import convert_to_mp3
+from .download import download_urls
 
 logging.basicConfig(
     level=logging.INFO,
     format="[%(asctime)s] | %(levelname)s | ( %(name)s ) - %(message)s",
     datefmt="%H:%M:%S",
 )
-logger = logging.getLogger(__name__)
 
 
 def arg_parse():
@@ -38,32 +36,7 @@ def arg_parse():
         default="out",
     )
     args = parser.parse_args()
-    logger.debug(args)
     return args
-
-
-def download_youtube(youtube: YouTube, output_path: str = "out") -> str:
-    logger.info(f"downloading: {youtube.title}")
-    stream = youtube.streams.get_highest_resolution()
-    output_path = os.path.join(output_path, "video")
-
-    return stream.download(output_path=output_path)
-
-
-def download_urls(urls: list[str], output_path: str = "out"):
-    dowloads = [
-        download_youtube(youtube=YouTube(url), output_path=output_path) for url in urls
-    ]
-    logger.debug(f"downloads: {dowloads}")
-    return dowloads
-
-
-def convert_to_mp3(videos: list[str], output_path: str = "out"):
-    for video in videos:
-        filename = os.path.splitext(os.path.split(video)[1])[0]
-        VideoFileClip(video).audio.write_audiofile(
-            os.path.join(output_path, "audio", f"{filename}.mp3")
-        )
 
 
 def main():
